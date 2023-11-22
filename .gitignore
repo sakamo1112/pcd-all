@@ -1,5 +1,3 @@
-*.toml
-*.lock
 *.pcd
 *.ply
 .DS_Store
