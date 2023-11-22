@@ -1,5 +1,5 @@
 # 🌈 pcd_all 🌈
-点群を扱う処理であれば何でもかんでも上げるリポジトリです.
+点群を扱う処理であれば何でも上げるリポジトリです.
 <br><br>
 
 
@@ -13,14 +13,31 @@
 ### 🎨 点群のクラスタリング処理
 ---
 #### 実装済みアルゴリズム
+- k-means法
 - mean-shift
-- 階層的クラスタリング
 - DBSCAN
 - HDBSCAN
+<br><br>
 
 #### 実行
+以下のように各関数を呼び出して実行します.<br>
+clustering.pyのmain文のコメントアウトを解除することによっても利用可能です.<br>
+点群データは.pcd形式です.
 ```
-TODO
+from pcd_algorithm.clustering import Clustering
+...
+
+# k-means法を使う場合
+clustered_pcds = Clustering().k_means(pcd, <クラスタ数(int)>)
+
+# mean-shiftを使う場合
+clustered_pcds = Clustering().mean_shift(pcd, <バンド幅の推定に使用する分位数(float)>, <バンド幅の推定に使用するサンプル数(int)>)
+
+# DBSCANを使う場合
+clustered_pcds = Clustering().dbscan(pcd, eps, min_points)
+
+# HDBSCANを使う場合
+clustered_pcds = Clustering().hdbscan(pcd, <クラスタを構成するための最小点数(int)>)
 ```
 <br><br>
 
