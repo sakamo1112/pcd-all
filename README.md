@@ -6,7 +6,7 @@
 ## Overview 🛼
 - [x] 点群をクラスタリングする処理
 - [ ] 点群Viewer
-- [ ] 点群のvoxel化処理
+- [x] 点群のvoxel化処理
 - [x] [Mask3D](https://github.com/cvg/Mask3D)実行結果を点群に投影する処理
 <br><br><br>
 
