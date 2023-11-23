@@ -1,7 +1,7 @@
 import argparse
 
 import numpy as np
-import open3d as o3d
+import open3d as o3d  # type: ignore
 
 SCANNET_COLOR_MAP_20 = {
     0: (0.0, 0.0, 0.0),
