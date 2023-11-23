@@ -72,6 +72,31 @@ class Clustering:
             bbox_list.append(bbox)
         return bbox_list
 
+    def draw_MeshBox(
+        self, cluster_pcds: list[o3d.geometry.PointCloud]
+    ) -> List[o3d.geometry.TriangleMesh]:
+        """
+        クラスタに対応するMeshBoxを描画する.
+
+        Args:
+            cluster_pcds (list[o3d.geometry.PointCloud]): クラスタリング結果の点群
+
+        Returns:
+            List[o3d.geometry.TriangleMesh]: クラスタリング結果の点群に対応するBBox
+        """
+        mesh_box_list = []
+        for cluster_pcd in cluster_pcds:
+            bbox = cluster_pcd.get_axis_aligned_bounding_box()
+            extent = bbox.get_extent()
+            mesh_box = o3d.geometry.TriangleMesh.create_box(
+                width=extent[0], height=extent[1], depth=extent[2]
+            )
+            mesh_box.paint_uniform_color([0, 1, 0])
+            mesh_box.compute_vertex_normals()
+            mesh_box.translate(bbox.get_center() - extent / 2)
+            mesh_box_list.append(mesh_box)
+        return mesh_box_list
+
     def k_means(
         self, pcd: o3d.geometry.PointCloud, n_clusters: int
     ) -> List[o3d.geometry.PointCloud]:
@@ -93,7 +118,10 @@ class Clustering:
         pcd = self.paint_clusters(pcd, labels)
         cluster_pcds = self.create_pcd_list(pcd, labels)
         bbox_list = self.draw_BBox(cluster_pcds)
+        mesh_box_list = self.draw_MeshBox(cluster_pcds)
+
         o3d.visualization.draw_geometries(cluster_pcds + bbox_list)
+        o3d.visualization.draw_geometries(cluster_pcds + mesh_box_list)
 
         return cluster_pcds
 
@@ -120,7 +148,10 @@ class Clustering:
         pcd = self.paint_clusters(pcd, labels)
         cluster_pcds = self.create_pcd_list(pcd, labels)
         bbox_list = self.draw_BBox(cluster_pcds)
+        mesh_box_list = self.draw_MeshBox(cluster_pcds)
+
         o3d.visualization.draw_geometries(cluster_pcds + bbox_list)
+        o3d.visualization.draw_geometries(cluster_pcds + mesh_box_list)
 
         return cluster_pcds
 
@@ -148,8 +179,10 @@ class Clustering:
         pcd = self.paint_clusters(pcd, labels)
         cluster_pcds = self.create_pcd_list(pcd, labels)
         bbox_list = self.draw_BBox(cluster_pcds)
+        mesh_box_list = self.draw_MeshBox(cluster_pcds)
 
         o3d.visualization.draw_geometries(cluster_pcds + bbox_list)
+        o3d.visualization.draw_geometries(cluster_pcds + mesh_box_list)
 
         return cluster_pcds
 
@@ -173,8 +206,10 @@ class Clustering:
         pcd = self.paint_clusters(pcd, labels)
         cluster_pcds = self.create_pcd_list(pcd, labels)
         bbox_list = self.draw_BBox(cluster_pcds)
+        mesh_box_list = self.draw_MeshBox(cluster_pcds)
 
         o3d.visualization.draw_geometries(cluster_pcds + bbox_list)
+        o3d.visualization.draw_geometries(cluster_pcds + mesh_box_list)
 
         return cluster_pcds
 
