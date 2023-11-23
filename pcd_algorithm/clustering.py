@@ -1,11 +1,12 @@
 import argparse
 from typing import List
 
-import hdbscan
+import hdbscan  # type: ignore
 import matplotlib.pyplot as plt
 import numpy as np
-import open3d as o3d
-from sklearn.cluster import KMeans, MeanShift, estimate_bandwidth
+import open3d as o3d  # type: ignore
+from sklearn.cluster import (KMeans, MeanShift,  # type: ignore
+                             estimate_bandwidth)
 
 
 class Clustering:

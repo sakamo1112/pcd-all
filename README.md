@@ -10,8 +10,8 @@
 - [x] [Mask3D](https://github.com/cvg/Mask3D)実行結果を点群に投影する処理
 <br><br><br>
 
-### 🎨 点群のクラスタリング処理
----
+
+## 🎨 点群のクラスタリング処理
 #### 実装済みアルゴリズム
 - k-means法
 - mean-shift
@@ -22,7 +22,8 @@
 #### 実行
 以下のように各関数を呼び出して実行します.<br>
 clustering.pyのmain文のコメントアウトを解除することによっても利用可能です.<br>
-点群データは.pcd形式です.
+点群データは.pcd形式です.<br>
+クラスタ別にBBoxをつける処理、クラスタをBBoxと同じサイズのメッシュに置き換える処理も実装しています.
 ```
 from pcd_algorithm.clustering import Clustering
 ...
@@ -39,11 +40,25 @@ clustered_pcds = Clustering().dbscan(pcd, eps, min_points)
 # HDBSCANを使う場合
 clustered_pcds = Clustering().hdbscan(pcd, <クラスタを構成するための最小点数(int)>)
 ```
-<br><br>
+<br><br><br>
 
 
-### 🎭 Mask3Dの結果描画処理
----
+## 🧩 点群のボクセル化処理
+点群をローポリにして遊べます.
+#### 実行
+```
+poetry run python pcd_algorithm/voxelize_pcd.py --pcd_path <点群のパス> --voxel_size <ボクセルの一辺の長さ>
+```
+<br>
+
+#### 実行結果
+|入力点群(旅館)|ボクセル化した結果|
+|---|---|
+|![入力点群(旅館)](https://github.com/sakamo1112/pcd-all/assets/125291665/4b4a8058-83ee-4293-bde0-fcc89cb8f10e)|![ボクセル化した結果](https://github.com/sakamo1112/pcd-all/assets/125291665/edcf8400-4ff3-4107-a935-fc01325c465b)|
+<br><br><br>
+
+
+## 🎭 Mask3Dの結果描画処理
 #### 実行
 ```
 poetry run python pcd_algorithm/Mask3D_mask.py 
