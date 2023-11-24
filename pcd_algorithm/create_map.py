@@ -4,7 +4,7 @@ import cv2  # type: ignore
 import numpy as np
 import open3d as o3d  # type: ignore
 
-from pcd_algorithm.voxelize_pcd import voxelize_pcd
+from voxelize_pcd import voxelize_pcd  # type: ignore
 
 
 def create_map(voxel_grid, grid_index_array):
