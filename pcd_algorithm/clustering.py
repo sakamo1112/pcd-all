@@ -203,7 +203,6 @@ class Clustering:
         pcd_np = np.asarray(pcd.points)
         clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size)
         labels = clusterer.fit_predict(pcd_np)
-
         pcd = self.paint_clusters(pcd, labels)
         cluster_pcds = self.create_pcd_list(pcd, labels)
         bbox_list = self.draw_BBox(cluster_pcds)

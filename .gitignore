@@ -2,3 +2,4 @@
 *.ply
 .DS_Store
 *.jpg
+__pycache__
