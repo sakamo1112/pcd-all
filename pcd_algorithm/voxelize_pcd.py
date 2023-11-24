@@ -80,7 +80,7 @@ def voxelize_pcd(
         cube_center = voxel.grid_index * voxel_size + min_bound + voxel_size / 2
         cube = create_mesh_cube(voxel_size, cube_center)
         linesets.append(cube)
-    o3d.visualization.draw_geometries(linesets + [voxel_grid])
+    # o3d.visualization.draw_geometries(linesets + [voxel_grid])
 
     return voxel_grid, linesets
 

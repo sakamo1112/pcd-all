@@ -2,6 +2,8 @@ import numpy as np
 import open3d as o3d  # type: ignore
 
 
+# https://qiita.com/popondeli/items/c20fa0af1ab1f4038f0d
+# ここを参考にする
 def animate():
     vis = o3d.visualization.Visualizer()
     vis.create_window()
