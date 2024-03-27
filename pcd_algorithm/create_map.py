@@ -3,7 +3,6 @@ import argparse
 import cv2  # type: ignore
 import numpy as np
 import open3d as o3d  # type: ignore
-
 from voxelize_pcd import voxelize_pcd  # type: ignore
 
 
