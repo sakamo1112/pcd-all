@@ -123,7 +123,7 @@ if __name__ == "__main__":
         "--pcd_path",
         "-i",
         type=str,
-        default="data/seisenkan_no_slab.pcd",
+        default="data/shibuya_pcd.pcd",
         help="Path to the point cloud file (.pcd)",
     )
     parser.add_argument("--voxel_size", "-v", type=float, default=0.2, help="voxel size")
