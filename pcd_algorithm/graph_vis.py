@@ -22,7 +22,7 @@ def draw_graph(G: nx.Graph) -> None:
     }
     for ax, (title, layout) in zip(axs, layouts.items()):
         pos = layout(G)
-        centrality = nx.degree_centrality(G)
+        centrality = nx.degree_centrality(G) # 次数中心性の計算
         node_color = [centrality[node] for node in G.nodes]
         nx.draw(
             G,
@@ -42,18 +42,18 @@ def draw_graph(G: nx.Graph) -> None:
     return None
 
 
-def main(xlsx_path: str, aeon_name: str) -> pd.DataFrame:
+def main(xlsx_path: str, sheet_name: str) -> pd.DataFrame:
     """
-    指定されたaeon_nameのデータを抽出し、DataFrameを作成します。
+    指定されたsheetのデータを抽出し、DataFrameを作成します。
 
     Parameters:
     data (pd.DataFrame): 全データが格納されているDataFrame
-    aeon_name (str): 抽出するイオンの名前
+    sheet_name (str): 抽出するイオンの名前
 
     Returns:
     pd.DataFrame: 抽出されたデータが格納されたDataFrame
     """
-    data = pd.read_excel(open(xlsx_path, "rb"), sheet_name=aeon_name)
+    data = pd.read_excel(open(xlsx_path, "rb"), sheet_name=sheet_name)
 
     G = nx.Graph()
     for i in range(len(data.index)):
@@ -71,10 +71,10 @@ if __name__ == "__main__":
         "--xlsx_path",
         "-i",
         type=str,
-        default="data/moriokaminami.xlsx",
+        default="data/data_for_test.xlsx",
         help="excel file (.xlsx)",
     )
-    parser.add_argument("--aeon_name", "-n", type=str, help="aeon name")
+    parser.add_argument("--sheet_name", "-n", type=str, help="sheet name")
     args = parser.parse_args()
 
-    data = main(args.xlsx_path, args.aeon_name)
+    data = main(args.xlsx_path, args.sheet_name)
