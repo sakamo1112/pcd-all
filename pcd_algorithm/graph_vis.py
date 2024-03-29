@@ -21,7 +21,7 @@ def draw_graph(G: nx.Graph) -> None:
     G (nx.Graph): 描画するグラフ
     """
     fig, axs = plt.subplots(2, 3, figsize=(10, 6.5))
-    axs = axs.flatten()[:6]
+    axs = axs.flatten()[:5]
     layouts = {
         "Spring": nx.spring_layout,
         "Kamada-Kawai": nx.kamada_kawai_layout,
@@ -43,7 +43,7 @@ def draw_graph(G: nx.Graph) -> None:
             cmap="viridis",
             edge_color="k",
             node_size=50,
-            font_size=2,
+            font_size=5,
             ax=ax,
         )
         ax.set_title(title)
@@ -51,6 +51,43 @@ def draw_graph(G: nx.Graph) -> None:
     plt.show()
 
     return None
+
+
+def draw_graph_3d(G: nx.Graph) -> None:
+    """
+    グラフを3Dで描画する。
+
+    Parameters:
+    G (nx.Graph): 描画するグラフ
+    """
+    # 3Dのspring layoutを計算
+    pos = nx.kamada_kawai_layout(G, dim=3)
+
+    # 3Dプロットの準備
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+
+    centrality = nx.degree_centrality(G)  # 次数中心性の計算
+    node_color = [centrality[node] for node in G.nodes]  # 色の強度を調整
+
+    for key, value in pos.items():
+        ax.text(value[0], value[1], value[2], f'{key}', color='black', fontsize=3)
+
+    xs, ys, zs = [], [], []
+    for key, value in pos.items():
+        xs.append(value[0])
+        ys.append(value[1])
+        zs.append(value[2])
+    ax.scatter(xs, ys, zs, c=node_color, cmap='viridis', depthshade=True)
+
+    # エッジを描画
+    for edge in G.edges():
+        x = [pos[edge[0]][0], pos[edge[1]][0]]
+        y = [pos[edge[0]][1], pos[edge[1]][1]]
+        z = [pos[edge[0]][2], pos[edge[1]][2]]
+        ax.plot(x, y, z, color="tab:gray")
+
+    plt.show()
 
 
 def main(xlsx_path: str, sheet_name: str) -> pd.DataFrame:
@@ -65,7 +102,7 @@ def main(xlsx_path: str, sheet_name: str) -> pd.DataFrame:
     pd.DataFrame: 抽出されたデータが格納されたDataFrame
     """
     data = pl.read_excel(xlsx_path, sheet_name=sheet_name).to_pandas()
-    data = Schema.validate(data)
+    #data = Schema.validate(data)
 
     G = nx.Graph()
     for i in range(len(data.index)):
@@ -88,6 +125,7 @@ def main(xlsx_path: str, sheet_name: str) -> pd.DataFrame:
         )
 
     draw_graph(G)
+    draw_graph_3d(G)
 
     return G
 
@@ -98,7 +136,7 @@ if __name__ == "__main__":
         "--xlsx_path",
         "-i",
         type=str,
-        default="data/data_for_test.xlsx",
+        default="data/aeon_graph.xlsx",
         help="excel file (.xlsx)",
     )
     parser.add_argument("--sheet_name", "-n", type=str, help="sheet name")
