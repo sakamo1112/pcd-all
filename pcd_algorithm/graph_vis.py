@@ -1,7 +1,17 @@
-import networkx as nx
-import matplotlib.pyplot as plt
 import argparse
+
+import matplotlib.pyplot as plt
+import networkx as nx  # type: ignore
 import pandas as pd  # type: ignore
+import pandera as pa  # type: ignore
+import polars as pl
+
+
+class Schema(pa.DataFrameModel):
+    edge_number: int = pa.Field(ge=0)
+    node_start: int = pa.Field(ge=0)
+    node_end: int = pa.Field(ge=0)
+
 
 def draw_graph(G: nx.Graph) -> None:
     """
@@ -22,18 +32,19 @@ def draw_graph(G: nx.Graph) -> None:
     }
     for ax, (title, layout) in zip(axs, layouts.items()):
         pos = layout(G)
-        centrality = nx.degree_centrality(G) # 次数中心性の計算
+        centrality = nx.degree_centrality(G)  # 次数中心性の計算
         node_color = [centrality[node] for node in G.nodes]
+        print(node_color)
         nx.draw(
             G,
             pos,
             with_labels=True,
             node_color=node_color,
-            cmap=plt.cm.viridis,
+            cmap="viridis",
             edge_color="k",
             node_size=50,
             font_size=2,
-            ax=ax
+            ax=ax,
         )
         ax.set_title(title)
     plt.suptitle("Graph Visualization with Different Layouts")
@@ -53,17 +64,33 @@ def main(xlsx_path: str, sheet_name: str) -> pd.DataFrame:
     Returns:
     pd.DataFrame: 抽出されたデータが格納されたDataFrame
     """
-    data = pd.read_excel(open(xlsx_path, "rb"), sheet_name=sheet_name)
+    data = pl.read_excel(xlsx_path, sheet_name=sheet_name).to_pandas()
+    data = Schema.validate(data)
 
     G = nx.Graph()
     for i in range(len(data.index)):
-        edge_name = "Edge" + str(i) + " (" + str(data.iloc[i, 1]) + "-" + str(data.iloc[i, 2]) + ")"
+        edge_name = (
+            "Edge"
+            + str(i)
+            + " ("
+            + str(data.iloc[i, 1])
+            + "-"
+            + str(data.iloc[i, 2])
+            + ")"
+        )
         shop_vector = list(data.iloc[i, 3:])
-        G.add_edge(data.iloc[i, 1], data.iloc[i, 2], label="", name=edge_name, vector_attribute=shop_vector)
+        G.add_edge(
+            data.iloc[i, 1],
+            data.iloc[i, 2],
+            label="",
+            name=edge_name,
+            vector_attribute=shop_vector,
+        )
 
     draw_graph(G)
 
     return G
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Load and display a point cloud")
