@@ -4,6 +4,50 @@ import matplotlib.pyplot as plt
 import networkx as nx  # type: ignore
 import pandas as pd  # type: ignore
 import polars as pl
+from mpl_toolkits.mplot3d import Axes3D 
+from networkx.algorithms import community
+import numpy as np
+
+def draw_communities_3d(G: nx.Graph) -> None:
+    """
+    グラフのコミュニティ分析結果を3Dで描画する。
+
+    Parameters:
+    G (nx.Graph): 描画するグラフ
+    """
+    # コミュニティを検出
+    communities = community.greedy_modularity_communities(G)
+
+    for i, comm in enumerate(communities, start=1):
+        print(f"Community {i}: {list(comm)}")
+    
+    # 3Dのspring layoutを計算
+    pos = nx.spring_layout(G, dim=3)
+    
+    # 3Dプロットの準備
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    
+    # コミュニティごとに色を割り当て
+    colors = plt.cm.rainbow(np.linspace(0, 1, len(communities)))
+    
+    for comm, color in zip(communities, colors):
+        xs, ys, zs = [], [], []
+        for node in comm:
+            x, y, z = pos[node]
+            xs.append(x)
+            ys.append(y)
+            zs.append(z)
+        ax.scatter(xs, ys, zs, color=color, edgecolor='k', s=20, depthshade=True)
+    
+    # エッジを描画
+    for edge in G.edges():
+        x = [pos[edge[0]][0], pos[edge[1]][0]]
+        y = [pos[edge[0]][1], pos[edge[1]][1]]
+        z = [pos[edge[0]][2], pos[edge[1]][2]]
+        ax.plot(x, y, z, color="tab:gray", linewidth=0.5)
+    
+    plt.show()
 
 
 def draw_graph(G: nx.Graph) -> None:
@@ -80,7 +124,7 @@ def draw_graph_3d(G: nx.Graph) -> None:
             gate_flows.append([value[0], value[1], value[2]])
         elif node in ver_flow_nodes:  # 特定のノードの場合
             vertical_flows.append([value[0], value[1], value[2]])
-    ax.scatter(xs, ys, zs, c=node_color, cmap='viridis', depthshade=True)
+    ax.scatter(xs, ys, zs, c=node_color, edgecolor='k', cmap='viridis', s=20, depthshade=True)
 
     for i in range(len(gate_nodes)):
         ax.scatter(gate_flows[i][0], gate_flows[i][1], gate_flows[i][2], c='green', s=100)
@@ -92,7 +136,7 @@ def draw_graph_3d(G: nx.Graph) -> None:
         x = [pos[edge[0]][0], pos[edge[1]][0]]
         y = [pos[edge[0]][1], pos[edge[1]][1]]
         z = [pos[edge[0]][2], pos[edge[1]][2]]
-        ax.plot(x, y, z, color="tab:gray")
+        ax.plot(x, y, z, color="tab:gray", linewidth=0.5)
 
     plt.show()
 
@@ -138,6 +182,9 @@ def main(xlsx_path: str, sheet_name: str) -> pd.DataFrame:
 
     draw_graph(G)
     draw_graph_3d(G)
+
+    # 既存のグラフGに対してコミュニティ分析を実行
+    draw_communities_3d(G)
 
     return G
 
