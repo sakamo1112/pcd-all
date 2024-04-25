@@ -2,4 +2,14 @@
 *.ply
 .DS_Store
 *.jpg
+*.png
+*.lock
+*.xlsx
+*.gml
+*.xml
+*.gfs
+*.xsd
+*.pdf
+*.db
+*.csv
 __pycache__
