@@ -5,7 +5,9 @@ import numpy as np
 import open3d as o3d  # type: ignore
 
 
-def create_mesh_edges(cube_size: float, cube_center: np.ndarray) -> o3d.geometry.LineSet:
+def create_mesh_edges(
+    cube_size: float, cube_center: np.ndarray
+) -> o3d.geometry.LineSet:
     """
     与えられたサイズと中心点を持つ立方体のメッシュを作成します。(メッシュの枠線)
 
@@ -57,7 +59,9 @@ def create_mesh_edges(cube_size: float, cube_center: np.ndarray) -> o3d.geometry
     return lines
 
 
-def create_mesh_cube(cube_size: float, cube_center: np.ndarray, cube_color: np.ndarray) -> o3d.geometry.TriangleMesh:
+def create_mesh_cube(
+    cube_size: float, cube_center: np.ndarray, cube_color: np.ndarray
+) -> o3d.geometry.TriangleMesh:
     """
     与えられたサイズと中心点を持つ立方体のメッシュを作成します。(立方体の実体)
 
@@ -68,13 +72,19 @@ def create_mesh_cube(cube_size: float, cube_center: np.ndarray, cube_color: np.n
     Returns:
     o3d.geometry.TriangleMesh: 立方体のメッシュ
     """
-    cube = o3d.geometry.TriangleMesh.create_box(width=cube_size, height=cube_size, depth=cube_size)
-    cube.translate(cube_center - np.array([cube_size / 2, cube_size / 2, cube_size / 2]))
+    cube = o3d.geometry.TriangleMesh.create_box(
+        width=cube_size, height=cube_size, depth=cube_size
+    )
+    cube.translate(
+        cube_center - np.array([cube_size / 2, cube_size / 2, cube_size / 2])
+    )
     cube.vertex_colors = o3d.utility.Vector3dVector(np.tile(cube_color, (8, 1)))
     return cube
 
 
-def voxel_grid_to_mesh(voxel_grid: o3d.geometry.VoxelGrid, voxel_size: float) -> o3d.geometry.TriangleMesh:
+def voxel_grid_to_mesh(
+    voxel_grid: o3d.geometry.VoxelGrid, voxel_size: float
+) -> o3d.geometry.TriangleMesh:
     """
     VoxelGridをTriangleMeshに変換します。
 
@@ -89,7 +99,9 @@ def voxel_grid_to_mesh(voxel_grid: o3d.geometry.VoxelGrid, voxel_size: float) ->
 
     # 各ボクセルを立方体メッシュに変換して結合
     for voxel in voxel_grid.get_voxels():
-        cube_center = voxel.grid_index * voxel_size + voxel_grid.get_min_bound() + voxel_size / 2
+        cube_center = (
+            voxel.grid_index * voxel_size + voxel_grid.get_min_bound() + voxel_size / 2
+        )
         cube_color = voxel.color
         cube_mesh = create_mesh_cube(voxel_size, cube_center, cube_color)
         combined_mesh += cube_mesh
