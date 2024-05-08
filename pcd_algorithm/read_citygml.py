@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import open3d as o3d  # type: ignore
 import pyproj
-import tqdm # type: ignore
+import tqdm  # type: ignore
 from shapely.geometry import MultiPolygon, Polygon  # type: ignore
 
 
@@ -50,6 +50,62 @@ def paint_buildings_by_height(gdf: gpd.GeoDataFrame, height_threshold: float = 3
     for color in gdf["color"].unique():
         gdf[gdf["color"] == color].plot(ax=ax, color=color)
 
+    plt.show()
+
+
+def calculate_building_centers(gdf):
+    """
+    Calculate the centroid of each building from its geometry.
+
+    Args:
+        gdf (geopandas.GeoDataFrame): GeoDataFrame containing building geometries.
+
+    Returns:
+        List[tuple]: List of tuples representing the centroids (x, y) of each building.
+    """
+    centers = []
+    for geometry in gdf["geometry"]:
+        centroid = geometry.centroid
+        centers.append((centroid.x, centroid.y))
+    return centers
+
+
+def serach_center_building(gdf: gpd.GeoDataFrame):
+    """
+    Calculate the centroid of each building from its geometry.
+    """
+    latitudes, longitudes = zip(*gdf["building_center"])
+
+    mean_latitude = np.mean(latitudes)
+    mean_longitude = np.mean(longitudes)
+
+    distances = np.sqrt(
+        (np.array(latitudes) - mean_latitude) ** 2
+        + (np.array(longitudes) - mean_longitude) ** 2
+    )
+    nearest_index = np.argmin(distances)
+    mean_distance = np.mean(distances)
+    gdf_near = gdf[distances <= mean_distance / 2]
+
+    nearest_building_center = gdf["building_center"].iloc[nearest_index]
+
+    return nearest_index, gdf_near
+
+
+def paint_center_building(gdf: gpd.GeoDataFrame, nearest_index: int):
+    """
+    Paint the building at the nearest index to the mean center.
+    """
+    gdf["color"] = "gray"
+    gdf.loc[nearest_index, "color"] = "green"
+    fig, ax = plt.subplots()
+    for color in gdf["color"].unique():
+        gdf[gdf["color"] == color].plot(ax=ax, color=color)
+    building_centers = gdf["building_center"].tolist()
+    x_coords, y_coords = zip(*building_centers)
+    ax.scatter(
+        x_coords, y_coords, color="red", s=10
+    )  # Plot red dots at building centers
     plt.show()
 
 
@@ -185,21 +241,36 @@ class CreateCityMesh:
                 mesh = self._create_building_mesh(polygon)
                 mesh_bldg += mesh
             mesh_bldg = self._paint_mesh_by_height(mesh_bldg, 30)
+            # o3d.visualization.draw_geometries([mesh_bldg], window_name="Building Mesh")
             meshes.append(mesh_bldg)
 
         return meshes
 
 
 if __name__ == "__main__":
-    gdf = gpd.read_file("data/plateau_citygml/udx/bldg/53394548_bldg_6697_op.gml")
-    gdf = gdf.head(100)
+    gdf = gpd.read_file("data/yokosuka_plateau/udx/bldg/52397533_bldg_6697_op.gml")
+    # gdf = gdf.head(10)
+    # building_centers = calculate_building_centers(gdf)
+    # gdf['building_center'] = building_centers
+    # nearest_index, gdf_near = serach_center_building(gdf)
+    # gdf = gdf_near
+    # paint_center_building(gdf_near, nearest_index)
+
+    print(gdf["storeysAboveGround"])  # 階数
+    print(gdf["totalFloorArea"])  # 建物の床面積
+
     # paint_buildings_by_height(gdf, 30)
     num_buildings = len(gdf.index)
+    print(gdf.columns)
+    if "measuredHeight" not in gdf.columns:
+        print("measuredHeight is not found")
+        exit(1)
+
     print(f"Number of buildings: {num_buildings}")
 
     meshes: List[o3d.geometry.TriangleMesh] = []
     for i in tqdm.tqdm(range(num_buildings)):
         building_gdf = gdf.iloc[i]
-        meshes = CreateCityMesh(building_gdf).create_city_mesh(meshes)
+        # meshes = CreateCityMesh(building_gdf).create_city_mesh(meshes)
 
     o3d.visualization.draw_geometries(meshes, window_name="Building Mesh")
