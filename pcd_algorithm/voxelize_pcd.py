@@ -57,6 +57,9 @@ def create_mesh_cube(cube_size: float, cube_center: np.ndarray) -> o3d.geometry.
     return lines
 
 
+# ここに関数を追加
+
+
 def remove_voxels(
     points: np.ndarray, colors: np.ndarray, ratio: float
 ) -> o3d.geometry.VoxelGrid:
@@ -137,7 +140,7 @@ if __name__ == "__main__":
         "--pcd_path",
         "-i",
         type=str,
-        default="data/shibuya_pcd.pcd",
+        default="data/seisenkan_no_slab.pcd",
         help="Path to the point cloud file (.pcd)",
     )
     parser.add_argument(
@@ -149,6 +152,9 @@ if __name__ == "__main__":
     parser.add_argument("--ratio", type=float, default=0.9, help="remove ratio")
     args = parser.parse_args()
     pcd = o3d.io.read_point_cloud(args.pcd_path)
+    # mesh = o3d.io.read_triangle_mesh("data/LumaAI/hibirabit/hibirabit.ply")
+    # o3d.visualization.draw_geometries([mesh])
+    # pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
     o3d.visualization.draw_geometries([pcd])
     voxel_size = args.voxel_size
 
