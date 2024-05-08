@@ -5,7 +5,7 @@ import numpy as np
 import open3d as o3d  # type: ignore
 
 
-def create_mesh_cube(cube_size: float, cube_center: np.ndarray) -> o3d.geometry.LineSet:
+def create_mesh_edges(cube_size: float, cube_center: np.ndarray) -> o3d.geometry.LineSet:
     """
     与えられたサイズと中心点を持つ立方体のメッシュを作成します。(メッシュの枠線)
 
@@ -57,7 +57,44 @@ def create_mesh_cube(cube_size: float, cube_center: np.ndarray) -> o3d.geometry.
     return lines
 
 
-# ここに関数を追加
+def create_mesh_cube(cube_size: float, cube_center: np.ndarray, cube_color: np.ndarray) -> o3d.geometry.TriangleMesh:
+    """
+    与えられたサイズと中心点を持つ立方体のメッシュを作成します。(立方体の実体)
+
+    Parameters:
+    cube_size (float): 立方体の一辺の長さ
+    cube_center (np.ndarray): 立方体の中心点
+
+    Returns:
+    o3d.geometry.TriangleMesh: 立方体のメッシュ
+    """
+    cube = o3d.geometry.TriangleMesh.create_box(width=cube_size, height=cube_size, depth=cube_size)
+    cube.translate(cube_center - np.array([cube_size / 2, cube_size / 2, cube_size / 2]))
+    cube.vertex_colors = o3d.utility.Vector3dVector(np.tile(cube_color, (8, 1)))
+    return cube
+
+
+def voxel_grid_to_mesh(voxel_grid: o3d.geometry.VoxelGrid, voxel_size: float) -> o3d.geometry.TriangleMesh:
+    """
+    VoxelGridをTriangleMeshに変換します。
+
+    Parameters:
+    voxel_grid (o3d.geometry.VoxelGrid): 入力VoxelGrid
+    voxel_size (float): ボクセルの一辺の長さ
+
+    Returns:
+    o3d.geometry.TriangleMesh: 結合されたメッシュ
+    """
+    combined_mesh = o3d.geometry.TriangleMesh()
+
+    # 各ボクセルを立方体メッシュに変換して結合
+    for voxel in voxel_grid.get_voxels():
+        cube_center = voxel.grid_index * voxel_size + voxel_grid.get_min_bound() + voxel_size / 2
+        cube_color = voxel.color
+        cube_mesh = create_mesh_cube(voxel_size, cube_center, cube_color)
+        combined_mesh += cube_mesh
+
+    return combined_mesh
 
 
 def remove_voxels(
@@ -127,9 +164,12 @@ def voxelize_pcd(
     linesets = []
     for voxel in voxel_grid.get_voxels():
         cube_center = voxel.grid_index * voxel_size + min_bound + voxel_size / 2
-        cube = create_mesh_cube(voxel_size, cube_center)
+        cube = create_mesh_edges(voxel_size, cube_center)
         linesets.append(cube)
     o3d.visualization.draw_geometries([pcd] + linesets + [voxel_grid])
+
+    mesh = voxel_grid_to_mesh(voxel_grid, voxel_size)
+    # o3d.io.write_triangle_mesh("data/voxel.ply", mesh)
 
     return voxel_grid, linesets
 
@@ -152,9 +192,6 @@ if __name__ == "__main__":
     parser.add_argument("--ratio", type=float, default=0.9, help="remove ratio")
     args = parser.parse_args()
     pcd = o3d.io.read_point_cloud(args.pcd_path)
-    # mesh = o3d.io.read_triangle_mesh("data/LumaAI/hibirabit/hibirabit.ply")
-    # o3d.visualization.draw_geometries([mesh])
-    # pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
     o3d.visualization.draw_geometries([pcd])
     voxel_size = args.voxel_size
 
