@@ -110,7 +110,7 @@ def voxel_grid_to_mesh(
 
 
 def remove_voxels(
-    points: np.ndarray, colors: np.ndarray, ratio: float
+    points: np.ndarray, colors: np.ndarray, ratio: float, voxel_size: float
 ) -> o3d.geometry.VoxelGrid:
     """
     指定された割合でボクセルをランダムに削除し、新しいボクセルグリッドを生成する。
@@ -171,7 +171,7 @@ def voxelize_pcd(
     )
     colors = np.array([voxel.color for voxel in voxel_grid.get_voxels()])
     if if_remove:
-        voxel_grid = remove_voxels(points, colors, remove_ratio)
+        voxel_grid = remove_voxels(points, colors, remove_ratio, voxel_size)
 
     linesets = []
     for voxel in voxel_grid.get_voxels():
@@ -181,7 +181,7 @@ def voxelize_pcd(
     o3d.visualization.draw_geometries([pcd] + linesets + [voxel_grid])
 
     mesh = voxel_grid_to_mesh(voxel_grid, voxel_size)
-    # o3d.io.write_triangle_mesh("data/voxel.ply", mesh)
+    o3d.io.write_triangle_mesh("data/voxel.ply", mesh)
 
     return voxel_grid, linesets
 
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         "--pcd_path",
         "-i",
         type=str,
-        default="data/seisenkan_no_slab.pcd",
+        default="data/LumaAI/bunny/bunny.pcd",
         help="Path to the point cloud file (.pcd)",
     )
     parser.add_argument(
@@ -204,7 +204,9 @@ if __name__ == "__main__":
     parser.add_argument("--ratio", type=float, default=0.9, help="remove ratio")
     args = parser.parse_args()
     pcd = o3d.io.read_point_cloud(args.pcd_path)
-    o3d.visualization.draw_geometries([pcd])
-    voxel_size = args.voxel_size
 
-    voxel_grid, linesets = voxelize_pcd(pcd, voxel_size, args.if_remove, args.ratio)
+    o3d.visualization.draw_geometries([pcd])
+
+    voxel_grid, linesets = voxelize_pcd(
+        pcd, args.voxel_size, args.if_remove, args.ratio
+    )
